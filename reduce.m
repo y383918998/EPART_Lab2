@@ -5,7 +5,7 @@ function rds = reduce(ds, parts)
 %	(1 means no reduction; 0 means no samples of given class to be left)
 % rds - reduced data set
 
-	labels = unique(ds(:, 1));
+	labels = unique(ds(:,1));
 	if rows(labels) ~= columns(parts)
 		error("Class number does not agree with the coefficients number.");
 	end
@@ -14,31 +14,16 @@ function rds = reduce(ds, parts)
 		error("Invalid reduction coefficients.");
 	end
 
+	% YOUR CODE GOES HERE
+	
 	rds = [];
-	% Reduce the number of samples for each category
-	for i = 1:rows(labels)
-		cls = labels(i);
-		% Extract all samples of this category
-		class_samples = ds(ds(:, 1) == cls, :);
-		n = rows(class_samples);
-		if n == 0
-			continue;
-		end
-
-		% Calculate the number of samples to be retained
-		keep = round(parts(i) * n);
-		% Ensure that at least one sample is retained
-		if keep < 1 && parts(i) > 0
-			keep = 1;
-		elseif keep < 1
-			keep = 0;
-		end
-
-		if keep > 0
-			% Randomly shuffle the samples and select the first 'keep' ones.
-			perm = randperm(n);
-			selected = class_samples(perm(1:keep), :);
-			rds = [rds; selected];
-		end
-	end
+	% for each class
+	for clid = 1: rows(labels)
+		% select only one class samples from ds
+		aclass = ds(ds(:, 1) == labels(clid, 1), :);
+		% shuffle samples of this class with randperm
+		% select proper part of shuffled class and append it to rds
+		sample_count = int64(rows(aclass) * parts(clid));
+		rds = [rds; aclass(randperm(rows(aclass), sample_count), :)];
+    end
 end

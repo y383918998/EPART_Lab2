@@ -17,13 +17,13 @@ function plot2features(tset, f1, f2)
 	pattern(8,:) = "bd";
 
 	res = tset(:, [f1, f2]);
-
+	
 	% extraction of all unique labels used in tset
 	labels = unique(tset(:,1));
 	if size(labels, 1) > 8
 		labels = labels(1:8);
 	end
-
+	
 	% create diagram and switch to content preserving mode
 	figure;
 	hold on;

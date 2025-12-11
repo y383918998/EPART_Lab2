@@ -9,28 +9,23 @@ function pdf = pdf_indep(pts, para)
 %	row count = number of samples in pts
 %	column count = number of classes
 
-	% Initialize the result matrix
+	% final result matrix
 	pdf = zeros(rows(pts), rows(para.mu));
-	num_classes = rows(para.mu);
-	num_features = columns(para.mu);
+	
+	% intermediate (one dimensional) density matrix
+	onedpdfs = zeros(rows(pts), columns(para.mu));
+	
+	% YOUR CODE GOES HERE
+	% 下面每一行%标注下面的代码都是新加的clid=classID,ftid=featureID,
+	% for each class
+	for clid  = 1:rows(para.mu)
+		% for each feature
+		for ftid = 1:columns(para.mu)
+			% fill proper column in onepdfs matrix
+			onedpdfs(:, ftid) = normpdf(pts(:, ftid), para.mu(clid, ftid), para.sig(clid, ftid));
+        end
+		% aggregate onepdfs into one column of pdf matrix
+		pdf(:, clid) = prod(onedpdfs, 2);
+    end
 
-	% 对每个类别计算概率密度 Calculate the probability density for each category
-	for c = 1:num_classes
-		% Initialize a one-dimensional density matrix
-		onedpdfs = zeros(rows(pts), num_features);
-
-		% Calculate the one-dimensional normal distribution density of each feature
-		for f = 1:num_features
-			mu = para.mu(c, f);
-			sig = para.sig(c, f);
-			% Avoid numerical issues caused by a standard deviation of 0
-			if sig < 1e-10
-				sig = 1e-10;
-			end
-			onedpdfs(:, f) = normpdf(pts(:, f), mu, sig);
-		end
-
-		% Under the assumption of feature independence, the joint probability is the product of the probabilities of each feature.
-		pdf(:, c) = prod(onedpdfs, 2);
-	end
 end

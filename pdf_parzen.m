@@ -1,29 +1,38 @@
-function p = pdf_parzen(X, para)
-% Vectorized Parzen window PDF estimation
-%  X: test samples (rows = samples, cols = features)
-%  para: structure from para_parzen()
-%        .labels
-%        .samples{c}
-%        .parzenw (scalar window width)
-%
-%  Returns: matrix (rows = samples, cols = classes)
+function pdf = pdf_parzen(pts, para)
+% Approximates probability density function with Parzen window
+% pts  - contains points for which pdf is computed (sample = row)
+% para - structure containing parameters:
+%	para.labels - class labels
+%	para.samples - cell array containing class samples
+%	para.parzenw - Parzen window width
+% pdf - probability density matrix
+%	row count = number of samples in pts
+%	column count = number of classes
 
-labels = para.labels;
-C = length(labels);
-[n, d] = size(X);
-p = zeros(n, C);
+	% final result matrix
+	pdf = rand(rows(pts), rows(para.samples));
 
-h = para.parzenw;
-coef = 1 / ((2*pi)^(d/2) * h^d);
-
-for c = 1:C
-    S = para.samples{c};   % training samples for this class
-    n_c = size(S,1);
-    % Vectorized computation: pairwise distances
-    % X: n×d, S: n_c×d → we compute squared distance efficiently
-    D2 = pdist2(X, S, 'euclidean').^2;
-    % Gaussian kernel sum
-    p(:,c) = coef * sum(exp(-0.5 * D2 / (h^2)), 2) / n_c;
+	% YOUR CODE GOES HERE
+	
+	% for each class
+	for clid = 1:rows(para.labels)
+		% you know number of samples in this class so you can allocate 
+		% intermediate matrix (it contains columns f1 f2 ... fn from diagram in instruction)
+		onedpdfs = zeros(rows(para.samples{clid}), columns(para.samples{clid}));
+		% don't forget to adjust Parzen window width
+		hn = para.parzenw / sqrt(rows(para.samples{clid}))
+		
+		% for each sample in pts
+		for ptid = 1:rows(pts)
+			% for each feature
+			for ftid = 1:columns(pts)  
+				% fill proper column in onedpdfs with call to normpdf
+				onedpdfs(:, ftid) = normpdf(pts(ptid, ftid), para.samples{clid}(:, ftid), hn);
+			end
+			% aggregate onedpdfs into a scalar value
+			multivariatePdfshares = prod(onedpdfs, 2);
+			% and store it in proper element of pdf
+			pdf(ptid, clid) = mean(multivariatePdfshares);
+		end
+    end
 end
-end
-

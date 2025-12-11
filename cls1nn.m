@@ -1,11 +1,9 @@
-function labels = cls1nn(x, ts)
-    if isvector(x)
-        x = x(:).';
-    end
-    ytr = ts(:,1);
-    Xtr = ts(:,2:end);
-    D = pdist2(x, Xtr, 'euclidean');
-    [~, idx] = min(D, [], 2);
-    labels = ytr(idx);
+function label = cls1nn(x, ts)
+% 1-NN classfier 
+% ts - training set; the first column contains class label
+% x - sample to be classified; no label here!
+% label - labels of x's nearest neighbour in ts
+  sqdist = sumsq(ts(:,2:end) - x, 2);
+  [~, iv] = min(sqdist);
+  label = ts(iv,1);
 end
-
